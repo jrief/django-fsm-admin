@@ -87,7 +87,8 @@ def fsm_transition_hints(context):
     if not original:
         return {}
 
+    request = context.get('request')
     model_admin = context.get('adminform').model_admin
     return {
-        'transition_hints': model_admin.get_transition_hints(original)
+        'transition_hints': model_admin.get_transition_hints(original, request)
     }

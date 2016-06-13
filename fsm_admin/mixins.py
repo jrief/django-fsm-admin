@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from collections import defaultdict
+from inspect import getargspec
 
 from django.conf import settings
 from django.contrib import messages
@@ -188,7 +189,7 @@ class FSMTransitionMixin(object):
             self._do_transition(transition, request, obj, form, fsm_field)
         super(FSMTransitionMixin, self).save_model(request, obj, form, change)
 
-    def get_transition_hints(self, obj):
+    def get_transition_hints(self, obj, request):
         """
         See `fsm_transition_hints` templatetag.
         """
@@ -201,8 +202,12 @@ class FSMTransitionMixin(object):
         for transition in transitions:
             for condition in transition.conditions:
 
-                # If the condition is valid, then we don't need the hint
-                if condition(obj):
+                # If the condition is valid, then we don't need the hint.
+                # If the condition accepts the `request` object, pass it
+                if 'request' in getargspec(condition).args:
+                    if condition(obj, request):
+                        continue
+                elif condition(obj):
                     continue
 
                 # if the transition is hidden, we don't need the hint

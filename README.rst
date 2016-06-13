@@ -76,6 +76,23 @@ This is useful, if most of your state transitions are handled by other means, su
 events communicating with the API of your application.
 
 
+The ``@transition`` decorator accepts an optional list of conditions. Sometimes, one of these
+methods must determine the result of the condition according to the given request, for instance to
+evaluate if a logged in user is allowed to perform that transition. Therefore, the
+``FSMTransitionMixin`` class autodetects if the condition method accepts the ``request`` object,
+and if so, passes it into that method. Example:
+
+::
+
+        def is_superuser(self, request=None):
+            return request and request.user.is_superuser()
+
+        @transition(field='state', source=['startstate'], target='finalstate', conditions=[is_superuser])
+        def do_something(self, some_param):
+            # will only add a button "Do Something", if the logged in user is the superuser
+
+
+
 Try the example
 ---------------
 
